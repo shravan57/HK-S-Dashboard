@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKS Initiative Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+:root{--navy:#1B3A6B;--navy2:#2a5298;--teal:#0D7377;--teal2:#14A3A8;--green:#1A7A4A;--green2:#22a05a;--red:#C0392B;--orange:#E67E22;--purple:#7B4FD1;--brown:#7A4E2D;--bg:#EEF1F7;--surface:#fff;--surface2:#F7F9FC;--border:#E2E8F0;--text:#1a202c;--muted:#64748b;--light:#94a3b8;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hdr{background:var(--navy);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(255,255,255,.08)}
+.hdr-logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--teal2),var(--teal));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;margin-right:12px;flex-shrink:0}
+.hdr-title{font-size:14px;font-weight:600;color:#fff}.hdr-sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.ts{font-size:11px;color:rgba(255,255,255,.45);font-family:'DM Mono',monospace}
+.hbtn{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;transition:background .15s}
+.hbtn:hover{background:rgba(255,255,255,.18)}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto;position:sticky;top:54px;z-index:100}
+.ntab{padding:11px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.ntab:hover{color:var(--text)}.ntab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.fbar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.flbl{font-size:11px;font-weight:600;color:var(--muted)}
+.fchip{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .15s}
+.fchip:hover,.fchip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.fsep{width:1px;height:20px;background:var(--border)}
+.fdates{display:flex;align-items:center;gap:6px}
+.fdates label{font-size:11px;color:var(--muted)}
+.fdates input[type=date]{padding:3px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface)}
+.fapply{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:var(--navy);color:#fff;font-family:'DM Sans',sans-serif}
+.finfo{font-size:11px;color:var(--muted);font-style:italic}
+.main{padding:20px 24px;max-width:1700px}
+.kgp{margin-bottom:18px}
+.kgh{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.kgt{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.kgl{flex:1;height:1px;background:var(--border)}
+.krow{display:grid;gap:10px}
+.kr6{grid-template-columns:repeat(6,1fr)}.kr5{grid-template-columns:repeat(5,1fr)}.kr4{grid-template-columns:repeat(4,1fr)}
+.kpi{background:var(--surface);border-radius:10px;padding:13px 15px;border:1px solid var(--border);box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac,var(--navy))}
+.klbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kval{font-size:22px;font-weight:600;color:var(--text);letter-spacing:-.5px;line-height:1}
+.knum{font-size:11px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace}
+.kbg{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;margin-top:6px}
+.bg{background:#dcfce7;color:#15803d}.br{background:#fee2e2;color:#b91c1c}.bo{background:#fff7ed;color:#c2410c}.bb{background:#eff6ff;color:#1d4ed8}.bn{background:#f1f5f9;color:#64748b}
+.panel{background:var(--surface);border-radius:11px;border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden}
+.ph{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pt{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.pi{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.pm{font-size:11px;color:var(--muted)}.pb{padding:16px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cl{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px}
+.cli{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.cld{width:12px;height:3px;border-radius:2px;display:inline-block}
+.cbrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cblbl{font-size:11px;color:var(--muted);width:115px;flex-shrink:0}
+.cbbar{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.cbfill{height:100%;border-radius:4px}
+.cbval{font-size:11px;font-weight:600;width:36px;text-align:right}
+.fbg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fbs{background:var(--surface2);border-radius:8px;padding:11px 12px;border:1px solid var(--border)}
+.fbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;font-weight:600}
+.fbv{font-size:19px;font-weight:600;letter-spacing:-.5px;line-height:1}
+.fbn2{font-size:10px;color:var(--light);margin-top:3px;font-family:'DM Mono',monospace}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{padding:7px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+.dt td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}.dt tr:hover td{background:var(--surface2)}
+.dtw{overflow-x:auto}
+.sp{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.sp::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.s-dep{background:#dcfce7;color:#15803d}.s-qa{background:#e0f2fe;color:#0369a1}
+.s-dev{background:#fff7ed;color:#c2410c}.s-rdy{background:#f0fdf4;color:#166534}
+.s-ns{background:#f1f5f9;color:#64748b}.s-sub{background:#dcfce7;color:#15803d}.s-ov{background:#fee2e2;color:#b91c1c}
+.tst{display:flex;gap:6px;margin-bottom:14px}
+.tsc{flex:1;text-align:center}
+.tsv{font-size:20px;font-weight:600}.tsl{font-size:10px;color:var(--muted);margin-top:2px}.tsb{height:4px;border-radius:2px;margin-top:5px}
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;padding:20px}
+.mov.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;padding:26px;width:580px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.22);max-height:90vh;overflow-y:auto}
+.mtitle{font-size:16px;font-weight:600;margin-bottom:4px}.msub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.frow.full{grid-template-columns:1fr}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--teal)}
+.fg textarea{resize:vertical;min-height:60px}
+.mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px}
+.btn{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.bp{background:var(--navy);color:#fff}.bp:hover{background:var(--navy2)}
+.bg2{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.bg2:hover{background:var(--border)}
+.bd{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}.bd:hover{background:#fecaca}
+.bsm{padding:4px 10px;font-size:11px;border-radius:5px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.bedit{background:#eff6ff;color:#1d4ed8}.bedit:hover{background:#dbeafe}
+.bdel{background:#fee2e2;color:#b91c1c;margin-left:4px}.bdel:hover{background:#fecaca}
+.uzone{border:1.5px dashed var(--border);border-radius:10px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;transition:all .15s;background:var(--surface2)}
+.uzone:hover,.uzone.dragover{border-color:var(--teal);background:#f0fdfc}
+.uzone input[type=file]{display:none}
+.uzl{font-size:13px;font-weight:500;margin-bottom:2px}.uzs{font-size:11px;color:var(--muted)}
+.umsg{font-size:12px;padding:7px 10px;border-radius:6px;margin-top:8px}
+.umsg.success{background:#dcfce7;color:#15803d}.umsg.error{background:#fee2e2;color:#b91c1c}
+.pane{display:none}.pane.active{display:block}
+@media(max-width:1200px){.kr6{grid-template-columns:repeat(3,1fr)}.kr5{grid-template-columns:repeat(3,1fr)}.g2,.g3{grid-template-columns:1fr}}
+@media(max-width:768px){.kr6,.kr5,.kr4{grid-template-columns:repeat(2,1fr)}.main{padding:12px}}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div style="display:flex;align-items:center">
+    <div class="hdr-logo">HK</div>
+    <div><div class="hdr-title">HKS Initiative Dashboard</div><div class="hdr-sub">Face Biometric · Feedback Checklist · Tech Tracker</div></div>
+  </div>
+  <div class="hdr-right">
+    <span class="ts" id="tsLabel">Last updated: —</span>
+    <button class="hbtn" onclick="openUpload()">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 10V2m0 0L5 5m3-3l3 3M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2"/></svg>Upload Data
+    </button>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="ntab active" onclick="switchTab('overview')">Overview</div>
+  <div class="ntab" onclick="switchTab('biometric')">Face Biometric</div>
+  <div class="ntab" onclick="switchTab('feedback')">Feedback Checklist</div>
+  <div class="ntab" onclick="switchTab('tech')">Tech Tracker</div>
+</nav>
+
+<div class="fbar">
+  <span class="flbl">Date Range:</span>
+  <div style="display:flex;gap:6px;flex-wrap:wrap" id="qchips">
+    <div class="fchip on" onclick="setQuick('all',this)">All Data</div>
+    <div class="fchip" onclick="setQuick('7',this)">Last 7 Days</div>
+    <div class="fchip" onclick="setQuick('14',this)">Last 14 Days</div>
+    <div class="fchip" onclick="setQuick('30',this)">Last 30 Days</div>
+    <div class="fchip" onclick="setQuick('thisweek',this)">This Week</div>
+  </div>
+  <div class="fsep"></div>
+  <div class="fdates">
+    <label>From</label><input type="date" id="dateFrom">
+    <label>To</label><input type="date" id="dateTo">
+    <button class="fapply" onclick="applyDateFilter()">Apply</button>
+  </div>
+  <span class="finfo" id="finfo"></span>
+</div>
+
+<div class="main">
+
+<!-- ══ OVERVIEW ══ -->
+<div id="tab-overview" class="pane active">
+
+  <!-- GROUP 1: FACE BIOMETRIC -->
+  <div class="kgp">
+    <div class="kgh"><span class="kgt">📡 Face Biometric</span><div class="kgl"></div></div>
+    <div class="krow kr6">
+      <div class="kpi" style="--ac:var(--navy)">
+        <div class="klbl">Branches Live</div><div class="kval" id="k-bio-br">709</div>
+        <div class="knum">Unique branches w/ ≥1 capture</div><div class="kbg bb">Biometric</div>
+      </div>
+      <div class="kpi" style="--ac:var(--teal)">
+        <div class="klbl">Total Captures</div><div class="kval" id="k-caps">28,207</div>
+        <div class="knum" id="k-caps-n">This period</div><div class="kbg bb" id="k-caps-d">—</div>
+      </div>
+      <div class="kpi" style="--ac:var(--green)">
+        <div class="klbl">HK Compliance</div><div class="kval" id="k-hk">75%</div>
+        <div class="knum" id="k-hk-n">—</div><div class="kbg bo" id="k-hk-b">Below target</div>
+      </div>
+      <div class="kpi" style="--ac:var(--orange)">
+        <div class="klbl">SG Compliance</div><div class="kval" id="k-sg">47%</div>
+        <div class="knum" id="k-sg-n">—</div><div class="kbg br" id="k-sg-b">Needs attention</div>
+      </div>
+      <div class="kpi" style="--ac:var(--brown)">
+        <div class="klbl">Kitchen Compliance</div><div class="kval" id="k-ks">42%</div>
+        <div class="knum" id="k-ks-n">—</div><div class="kbg br" id="k-ks-b">Needs attention</div>
+      </div>
+      <div class="kpi" style="--ac:var(--purple)">
+        <div class="klbl">Overall Compliance</div><div class="kval" id="k-overall">55%</div>
+        <div class="knum">Avg of HK + SG + Kitchen</div><div class="kbg bo" id="k-overall-b">Below target</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP 2: FEEDBACK FORMS -->
+  <div class="kgp">
+    <div class="kgh"><span class="kgt">✅ Feedback Forms</span><div class="kgl"></div></div>
+    <div class="krow kr5">
+      <div class="kpi" style="--ac:var(--navy)">
+        <div class="klbl">Branches (Feedback)</div><div class="kval" id="k-fb-br">648</div>
+        <div class="knum">Unique branches w/ active forms</div><div class="kbg bb">Feedback</div>
+      </div>
+      <div class="kpi" style="--ac:var(--green)">
+        <div class="klbl">Checklist Rate</div><div class="kval" id="k-cl">33%</div>
+        <div class="knum" id="k-cl-n">1,118 of 3,408 submitted</div><div class="kbg br" id="k-cl-b">Critical</div>
+      </div>
+      <div class="kpi" style="--ac:var(--red)">
+        <div class="klbl">Overdue Forms</div><div class="kval" id="k-ov-pct">67%</div>
+        <div class="knum" id="k-ov-n">2,290 of 3,408 forms</div><div class="kbg br">Action needed</div>
+      </div>
+      <div class="kpi" style="--ac:var(--orange)">
+        <div class="klbl">Avg Days Overdue</div><div class="kval" id="k-avov">5.5</div>
+        <div class="knum">Days past deadline</div><div class="kbg br">High</div>
+      </div>
+      <div class="kpi" style="--ac:var(--purple)">
+        <div class="klbl">Total Forms Issued</div><div class="kval" id="k-total">3,408</div>
+        <div class="knum">All statuses combined</div><div class="kbg bb">Daily</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP 3: TECH PROGRESS -->
+  <div class="kgp">
+    <div class="kgh"><span class="kgt">⚙️ Tech Progress</span><div class="kgl"></div></div>
+    <div class="krow kr4">
+      <div class="kpi" style="--ac:var(--green)">
+        <div class="klbl">Deployed</div><div class="kval" id="k-t-dep">1</div>
+        <div class="knum" id="k-t-dep-n">of 31 items</div><div class="kbg bg">Live</div>
+      </div>
+      <div class="kpi" style="--ac:var(--teal)">
+        <div class="klbl">In QA Testing</div><div class="kval" id="k-t-qa">20</div>
+        <div class="knum">Items being tested</div><div class="kbg bb">QA</div>
+      </div>
+      <div class="kpi" style="--ac:var(--orange)">
+        <div class="klbl">In Development</div><div class="kval" id="k-t-dev">4</div>
+        <div class="knum">Active build</div><div class="kbg bo">In Dev</div>
+      </div>
+      <div class="kpi" style="--ac:var(--light)">
+        <div class="klbl">Not Started / Ready</div><div class="kval" id="k-t-ns">6</div>
+        <div class="knum" id="k-t-ns-n">5 backlog, 1 ready</div><div class="kbg bn">Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="g2 mb20">
+    <div class="panel">
+      <div class="ph">
+        <div class="pt"><div class="pi" style="background:#e0f2fe">📡</div>Face Biometric — Daily Compliance Trend</div>
+        <div class="pm" id="bio-dr">Mar 19–23, 2026</div>
+      </div>
+      <div class="pb">
+        <div class="cl">
+          <div class="cli"><span class="cld" style="background:#1A7A4A"></span>HK (Housekeeping)</div>
+          <div class="cli"><span class="cld" style="background:#E67E22"></span>SG (Security)</div>
+          <div class="cli"><span class="cld" style="background:#7A4E2D;opacity:.7"></span>Kitchen (dashed)</div>
+        </div>
+        <div style="position:relative;height:205px"><canvas id="bioChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph">
+        <div class="pt"><div class="pi" style="background:#fef3c7">✅</div>Feedback — Submission Summary</div>
+        <div class="pm">Current period</div>
+      </div>
+      <div class="pb">
+        <div class="fbg">
+          <div class="fbs"><div class="fbl">Branches Submitted</div><div class="fbv" id="fb-br" style="color:var(--green)">—</div><div class="fbn2">Unique branches</div></div>
+          <div class="fbs"><div class="fbl">Overdue %</div><div class="fbv" id="fb-ov" style="color:var(--red)">67%</div><div class="fbn2" id="fb-ov-c">2,290 forms</div></div>
+          <div class="fbs"><div class="fbl">HK Submitted</div><div class="fbv" id="fb-hks" style="color:var(--teal)">—</div><div class="fbn2" id="fb-hks-n">—</div></div>
+          <div class="fbs"><div class="fbl">HK Not Submitted</div><div class="fbv" id="fb-hkn" style="color:var(--orange)">—</div><div class="fbn2" id="fb-hkn-n">—</div></div>
+          <div class="fbs"><div class="fbl">SG Submitted</div><div class="fbv" id="fb-sgs" style="color:var(--teal)">—</div><div class="fbn2" id="fb-sgs-n">—</div></div>
+          <div class="fbs"><div class="fbl">SG Not Submitted</div><div class="fbv" id="fb-sgn" style="color:var(--orange)">—</div><div class="fbn2" id="fb-sgn-n">—</div></div>
+          <div class="fbs"><div class="fbl">Weekly Submitted</div><div class="fbv" id="fb-wks" style="color:var(--teal)">—</div><div class="fbn2" id="fb-wks-n">—</div></div>
+          <div class="fbs"><div class="fbl">Weekly Not Submitted</div><div class="fbv" id="fb-wkn" style="color:var(--orange)">—</div><div class="fbn2" id="fb-wkn-n">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mb20">
+    <div class="panel">
+      <div class="ph"><div class="pt"><div class="pi" style="background:#ede9fe">⚙️</div>Tech Development Progress</div><div class="pm" id="tech-total">31 items</div></div>
+      <div class="pb"><div class="tst" id="techStages"></div><div style="position:relative;height:170px"><canvas id="techChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="pt"><div class="pi" style="background:#fee2e2">🚨</div>Issues — QA &amp; Dev Pipeline</div><div class="pm">Active items</div></div>
+      <div class="dtw"><table class="dt"><thead><tr><th>#</th><th>Feature</th><th>Status</th></tr></thead><tbody id="issuesMini"></tbody></table></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ BIOMETRIC TAB ══ -->
+<div id="tab-biometric" class="pane">
+  <div class="g3 mb16">
+    <div class="panel"><div class="ph"><div class="pt">HK Daily Compliance</div></div><div class="pb"><div style="position:relative;height:185px"><canvas id="hkChart"></canvas></div></div></div>
+    <div class="panel"><div class="ph"><div class="pt">SG Daily Compliance</div></div><div class="pb"><div style="position:relative;height:185px"><canvas id="sgChart"></canvas></div></div></div>
+    <div class="panel"><div class="ph"><div class="pt">Kitchen Daily Compliance</div></div><div class="pb"><div style="position:relative;height:185px"><canvas id="ksChart"></canvas></div></div></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div class="pt">📋 Daily Summary Table</div><div class="pm" id="bioMeta">—</div></div>
+    <div class="dtw"><table class="dt">
+      <thead><tr><th>Date</th><th>Day</th><th>Branches</th><th>HK Quota</th><th>HK Showed</th><th>HK %</th><th>SG Quota</th><th>SG Showed</th><th>SG %</th><th>Kitchen Quota</th><th>Kitchen Showed</th><th>Kitchen %</th><th>Captures</th></tr></thead>
+      <tbody id="bioBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ FEEDBACK TAB ══ -->
+<div id="tab-feedback" class="pane">
+  <div class="g2 mb16">
+    <div class="panel"><div class="ph"><div class="pt">Submission Status</div></div><div class="pb"><div style="position:relative;height:230px"><canvas id="fbStatusChart"></canvas></div></div></div>
+    <div class="panel"><div class="ph"><div class="pt">Form Type Breakdown</div></div><div class="pb"><div style="position:relative;height:230px"><canvas id="fbTypeChart"></canvas></div></div></div>
+  </div>
+  <div class="panel mb16"><div class="ph"><div class="pt">Compliance by Category</div><div class="pm" id="fbMeta">—</div></div><div class="pb" id="fbBars"></div></div>
+  <div class="panel">
+    <div class="ph"><div class="pt">Feedback Form List</div><div class="pm">Top 200 records</div></div>
+    <div class="dtw"><table class="dt">
+      <thead><tr><th>Branch</th><th>Designation</th><th>Sub Type</th><th>Status</th><th>Due Date</th><th>Days Overdue</th></tr></thead>
+      <tbody id="fbList"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ TECH TAB ══ -->
+<div id="tab-tech" class="pane">
+  <div class="g2 mb16">
+    <div class="panel"><div class="ph"><div class="pt">Status Distribution</div></div><div class="pb"><div style="position:relative;height:230px"><canvas id="techStatusChart"></canvas></div></div></div>
+    <div class="panel"><div class="ph"><div class="pt">🚀 Deployed Features</div></div>
+      <div class="dtw"><table class="dt"><thead><tr><th>#</th><th>Feature</th><th>Platform</th><th>Deployed Date</th><th>Notes</th></tr></thead><tbody id="depBody"></tbody></table></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">📋 Full Requirements Tracker</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="pm" id="techMeta">—</div>
+        <button class="bsm bedit" onclick="openAdd()">+ Add Item</button>
+      </div>
+    </div>
+    <div class="dtw"><table class="dt">
+      <thead><tr><th>#</th><th>Requirement / Feature</th><th>Type</th><th>Platform</th><th>Developer</th><th>Status</th><th>Start</th><th>Expected</th><th>Actions</th></tr></thead>
+      <tbody id="techBody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+</div>
+
+<!-- TECH MODAL -->
+<div class="mov" id="techModal">
+  <div class="modal">
+    <div class="mtitle" id="tmTitle">Add Item</div>
+    <div class="msub">Fill in the details for this requirement or feature.</div>
+    <input type="hidden" id="tmIdx">
+    <div class="frow full"><div class="fg"><label>Feature / Requirement Name</label><textarea id="tm-name" rows="2"></textarea></div></div>
+    <div class="frow">
+      <div class="fg"><label>Type</label><select id="tm-type"><option>Feature</option><option>Bug Fix</option><option>Validation</option><option>UX</option><option>Content</option><option>Config</option><option>Other</option></select></div>
+      <div class="fg"><label>Platform</label><select id="tm-plat"><option>Admin Panel</option><option>Web App</option><option>All</option><option>Mobile</option><option>Other</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Developer</label><input type="text" id="tm-dev" placeholder="Name or —"></div>
+      <div class="fg"><label>QA Assigned</label><input type="text" id="tm-qa" placeholder="Name or —"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Status</label><select id="tm-status"><option>Not Started</option><option>In Development</option><option>QA Testing</option><option>Ready for Release</option><option>Deployed</option></select></div>
+      <div class="fg"><label>Start Date</label><input type="date" id="tm-start"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Expected Completion</label><input type="date" id="tm-exp"></div>
+      <div class="fg"><label>Jira Link</label><input type="text" id="tm-jira" placeholder="https://..."></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bd" id="tmDelBtn" onclick="doDelete()" style="display:none">Delete Item</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="btn bg2" onclick="closeTM()">Cancel</button>
+        <button class="btn bp" onclick="saveTM()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="mov" id="uploadModal">
+  <div class="modal">
+    <div class="mtitle">Upload Data</div>
+    <div class="msub">Upload latest Excel exports. Data is saved in your browser.</div>
+    <div class="uzone" id="bioZone" onclick="document.getElementById('bioFile').click()" ondragover="dov(event,'bioZone')" ondragleave="dlv('bioZone')" ondrop="ddf(event,'bio')">
+      <input type="file" id="bioFile" accept=".xlsx,.xls" onchange="hf(event,'bio')">
+      <div style="font-size:24px;margin-bottom:6px">📡</div>
+      <div class="uzl">Face Biometric — Attendance Excel</div>
+      <div class="uzs" id="bioSub">Drag & drop or click · .xlsx / .xls</div>
+    </div>
+    <div class="uzone" id="fbZone" onclick="document.getElementById('fbFile').click()" ondragover="dov(event,'fbZone')" ondragleave="dlv('fbZone')" ondrop="ddf(event,'fb')">
+      <input type="file" id="fbFile" accept=".xlsx,.xls" onchange="hf(event,'fb')">
+      <div style="font-size:24px;margin-bottom:6px">✅</div>
+      <div class="uzl">Feedback Forms — Checklist Excel</div>
+      <div class="uzs" id="fbSub">Drag & drop or click · .xlsx / .xls</div>
+    </div>
+    <div id="umsg" style="display:none" class="umsg"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn bg2" onclick="closeUp()">Cancel</button>
+      <button class="btn bp" onclick="applyUp()">Apply & Refresh</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── GITHUB DATA SOURCE ──────────────────────────────────────────
+// Replace GITHUB_RAW_URL with your actual raw URL after setup.
+// Format: https://raw.githubusercontent.com/USERNAME/REPO/main/data/data.json
+const GITHUB_RAW_URL = 'REPLACE_WITH_YOUR_RAW_URL';
+const SAVE_FUNCTION_URL = '/.netlify/functions/save-data';
+
+let CHS={}, PD={bio:null,fb:null}, AF={type:'all',from:null,to:null};
+let GDATA = null; // holds the full data object loaded from GitHub
+
+const SB={totalUniqueBranches:709,daily:[
+  {date:'2026-03-19',label:'19 Mar',day:'Thu',branches:313,hkQ:1820,hkS:1146,sgQ:2104,sgS:979,ksQ:712,ksS:300,caps:3934},
+  {date:'2026-03-20',label:'20 Mar',day:'Fri',branches:659,hkQ:3941,hkS:3297,sgQ:4523,sgS:2249,ksQ:1521,ksS:601,caps:9440},
+  {date:'2026-03-21',label:'21 Mar',day:'Sat',branches:451,hkQ:2677,hkS:1885,sgQ:3084,sgS:1423,ksQ:1037,ksS:470,caps:5585},
+  {date:'2026-03-22',label:'22 Mar',day:'Sun',branches:285,hkQ:1670,hkS:901,sgQ:1929,sgS:913,ksQ:648,ksS:254,caps:3200},
+  {date:'2026-03-23',label:'23 Mar',day:'Mon',branches:670,hkQ:4013,hkS:3354,sgQ:4598,sgS:2022,ksQ:1545,ksS:600,caps:6048},
+]};
+const SF={total:3408,submitted:1118,overdue:2290,branches:648,avgOverdue:5.5,
+  hkTotal:1740,hkSubmitted:492,sgTotal:980,sgSubmitted:288,weeklyTotal:320,weeklySubmitted:98,
+  bySubType:{Housekeeping:{total:1740,submitted:492},Security:{total:980,submitted:288},Weekly:{total:320,submitted:98},Other:{total:368,submitted:240}},
+  // Seed raw rows: generate representative records so date filter works on seed data
+  rawRows:(()=>{
+    const rows=[];const dates=['2026-03-19','2026-03-20','2026-03-21','2026-03-22','2026-03-23'];
+    const subTypes=['Housekeeping','Housekeeping','Security','Weekly','Other'];
+    const subCounts=[1740,0,980,320,368];// Housekeeping split across daily dates
+    // Spread 3408 records across 5 dates
+    let id=0;
+    dates.forEach((dt,di)=>{
+      const perDay=Math.round(3408/5);
+      for(let i=0;i<perDay;i++){
+        const st=subTypes[i%5];
+        const isHK=st==='Housekeeping',isSG=st==='Security',isWK=st==='Weekly';
+        const subRate=isHK?492/1740:isSG?288/980:isWK?98/320:240/368;
+        const isSubmitted=Math.random()<subRate;
+        rows.push({branch:'BRANCH-'+((id%648)+1),designation:'AO',subType:st,status:isSubmitted?'Submitted':'Overdue',isSubmitted,isOverdue:!isSubmitted,dateISO:dt,dueDate:dt,daysOverdue:isSubmitted?0:Math.floor(Math.random()*10)+1});
+        id++;
+      }
+    });
+    return rows;
+  })()
+};
+const ST=[
+  {num:1,name:'Branch Auth Tab in Admin Panel',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'2026-03-05',expected:''},
+  {num:2,name:'Branch Auth ID Management Screen',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'2026-03-05',expected:''},
+  {num:3,name:'Remove Columns from Manpower Distribution',type:'Bug Fix',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:4,name:'Add Team Leader, AGM, Branch Status Columns',type:'Feature',platform:'All',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:5,name:'Add Filters for New Fields',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:6,name:'Validation for Inactive Branch Upload',type:'Validation',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:7,name:'Branch & Building Selection in Feedback Form',type:'Feature',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:8,name:'Access Control Before Branch Selection',type:'Feature',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:9,name:'Auto-Select Branch for Single Branch Users',type:'Feature',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:10,name:'Building Dropdown Structure',type:'Feature',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:11,name:'Display Building Details in Preview',type:'Feature',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:12,name:'Update Feedback Form Questions to Past Tense',type:'Content',platform:'Web App',dev:'—',qa:'—',status:'Not Started',start:'',expected:''},
+  {num:13,name:'Add "Feedback For Date" Column',type:'Feature',platform:'All',dev:'—',qa:'—',status:'Not Started',start:'',expected:''},
+  {num:14,name:'Add Building Details in Feedback Forms',type:'Feature',platform:'All',dev:'—',qa:'—',status:'Not Started',start:'',expected:''},
+  {num:15,name:'Replace Designation-Based with Permission-Based Access',type:'Feature',platform:'All',dev:'—',qa:'—',status:'Ready for Release',start:'',expected:''},
+  {num:16,name:'Display Role-wise Quota & Capture % on Dashboard',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'In Development',start:'',expected:''},
+  {num:17,name:'Add Percentage Column in Export Report',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'In Development',start:'',expected:''},
+  {num:18,name:'Download Consolidated Monthly Reports',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'Not Started',start:'',expected:''},
+  {num:19,name:'Improve Face Capture Guidance in Web App',type:'UX',platform:'Web App',dev:'—',qa:'—',status:'Deployed',start:'',expected:''},
+  {num:20,name:'Rename "Overdue" to "Submission Missed"',type:'Content',platform:'All',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:21,name:'Add Submission Deadline Subheading',type:'UX',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:22,name:'Update Daily Form Availability Window',type:'Config',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:23,name:'Update Face Biometric Error Message',type:'Content',platform:'Web App',dev:'—',qa:'—',status:'Not Started',start:'',expected:''},
+  {num:24,name:'Add "Edit Manpower Distribution" Button',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:25,name:'Add Row-Level Edit in Manpower Distribution',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:26,name:'Enable Edit in Day-wise Quota Detail Screen',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'In Development',start:'',expected:''},
+  {num:27,name:'Branch Auth ID – Bulk Upload Validations',type:'Validation',platform:'Admin Panel',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:28,name:'Showcasing "Enable Location" Video Guide',type:'UX',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:29,name:'Feedback Form – Default Option Removal',type:'UX',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:30,name:'Feedback Form – Submit Button Validation',type:'Validation',platform:'Web App',dev:'—',qa:'—',status:'QA Testing',start:'',expected:''},
+  {num:31,name:'Admin Panel – Dashboard Report Download Enhancement',type:'Feature',platform:'Admin Panel',dev:'—',qa:'—',status:'In Development',start:'',expected:''},
+];
+const SD=[{num:1,feature:'Improve Face Capture UI Guidance',platform:'Web App',date:'16 Mar 2026',notes:'Area outside rectangle overlay greyed out. Added instruction "Align your face inside the frame".'}];
+
+// Load data from GitHub (with cache-bust), fall back to seed if unavailable
+async function loadFromGitHub(){
+  if(GITHUB_RAW_URL==='REPLACE_WITH_YOUR_RAW_URL'){
+    // Not configured yet — use seed data
+    GDATA={bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
+    return;
+  }
+  try{
+    const url=GITHUB_RAW_URL+'?t='+Date.now();
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    GDATA=await res.json();
+  }catch(e){
+    console.warn('GitHub load failed, using seed data:',e.message);
+    GDATA={bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
+  }
+}
+function la(){
+  return GDATA||{bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
+}
+// Save full data object to GitHub via Netlify function
+async function saveToGitHub(newData){
+  if(GITHUB_RAW_URL==='REPLACE_WITH_YOUR_RAW_URL'){
+    // Not configured — just update in-memory
+    GDATA=newData; return {ok:true,local:true};
+  }
+  try{
+    const res=await fetch(SAVE_FUNCTION_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(newData)
+    });
+    if(!res.ok){const t=await res.text();throw new Error(t);}
+    GDATA=newData;
+    return await res.json();
+  }catch(e){
+    console.error('Save failed:',e);
+    throw e;
+  }
+}
+function stech(a){
+  const d=la();
+  d.tech=a;
+  saveToGitHub(d).catch(e=>showSaveError(e.message));
+}
+
+// DATE FILTER
+function setQuick(type,el){document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');AF={type,from:null,to:null};document.getElementById('dateFrom').value='';document.getElementById('dateTo').value='';render();}
+function applyDateFilter(){const f=document.getElementById('dateFrom').value,t=document.getElementById('dateTo').value;if(!f&&!t)return;document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('on'));AF={type:'custom',from:f,to:t};render();}
+function filterDays(daily){
+  const f=AF;if(f.type==='all')return daily;
+  const today=new Date();today.setHours(0,0,0,0);
+  if(f.type==='custom'){const fd=f.from?new Date(f.from):null,td=f.to?new Date(f.to):null;return daily.filter(d=>{const dt=new Date(d.date);if(fd&&dt<fd)return false;if(td&&dt>td)return false;return true;});}
+  const days={7:7,14:14,30:30,thisweek:7}[f.type]||9999;const cut=new Date(today);cut.setDate(today.getDate()-days+1);return daily.filter(d=>new Date(d.date)>=cut);
+}
+
+// RENDER
+function render(){
+  const{bio,fb,tech,dep,lu}=la();
+  document.getElementById('tsLabel').textContent='Last updated: '+lu;
+  const fd=filterDays(bio.daily);
+  const ffb=filterFB(fb);
+  const fi=document.getElementById('finfo');
+  const bioInfo=fd.length>0?fd.length+' day'+(fd.length!==1?'s':''):'0 days';
+  const fbInfo=ffb._filteredRows!=null?ffb._filteredRows+' forms':'all forms';
+  fi.textContent='Biometric: '+bioInfo+' | Feedback: '+fbInfo;
+  rKPI(bio,fd,ffb,tech);rBio(bio,fd);rFB(ffb);rTech(tech,dep);
+}
+
+// FILTER FEEDBACK by date range using raw rows stored in fb.rawRows
+function filterFB(fb){
+  if(!fb.rawRows||fb.rawRows.length===0) return fb;
+  const f=AF;
+  if(f.type==='all') return {...fb,_filteredRows:fb.rawRows.length};
+  const today=new Date();today.setHours(0,0,0,0);
+  let fromDate=null,toDate=null;
+  if(f.type==='custom'){
+    fromDate=f.from?new Date(f.from):null;
+    toDate=f.to?new Date(f.to):null;
+  } else {
+    const days={7:7,14:14,30:30,thisweek:7}[f.type]||9999;
+    fromDate=new Date(today);fromDate.setDate(today.getDate()-days+1);
+    toDate=today;
+  }
+  const filtered=fb.rawRows.filter(r=>{
+    if(!r.dateISO) return true;
+    const dt=new Date(r.dateISO);
+    if(fromDate&&dt<fromDate) return false;
+    if(toDate&&dt>toDate) return false;
+    return true;
+  });
+  return aggFBRows(filtered,fb);
+}
+
+function aggFBRows(rows,fbOrig){
+  const total=rows.length;
+  const submitted=rows.filter(r=>r.isSubmitted).length;
+  const overdue=rows.filter(r=>r.isOverdue).length;
+  const branches=new Set(rows.map(r=>r.branch).filter(Boolean)).size;
+  const od=rows.filter(r=>r.daysOverdue>0).map(r=>r.daysOverdue);
+  const avgOverdue=od.length>0?+(od.reduce((a,b)=>a+b,0)/od.length).toFixed(1):0;
+  const stg={};
+  rows.forEach(r=>{
+    const st=r.subType||'Other';
+    if(!stg[st])stg[st]={total:0,submitted:0};
+    stg[st].total++;
+    if(r.isSubmitted)stg[st].submitted++;
+  });
+  const find=kws=>{for(const k of Object.keys(stg)){if(kws.some(w=>k.toLowerCase().includes(w)))return stg[k];}return{total:0,submitted:0};};
+  const hk=find(['housekeeping','hk']),sg=find(['security','sg']),wk=find(['weekly','week']);
+  const fl=rows.slice(0,200).map(r=>({branch:r.branch,designation:r.designation,subType:r.subType,status:r.status,dueDate:r.dueDate,daysOverdue:r.daysOverdue}));
+  return{
+    total,submitted,overdue,branches,avgOverdue,
+    hkTotal:hk.total,hkSubmitted:hk.submitted,
+    sgTotal:sg.total,sgSubmitted:sg.submitted,
+    weeklyTotal:wk.total,weeklySubmitted:wk.submitted,
+    bySubType:stg,formList:fl,
+    rawRows:fbOrig.rawRows,
+    _filteredRows:rows.length
+  };
+}
+
+// HELPERS
+function pc(a,b){return b>0?Math.round(a/b*100):0;}
+function pct(a,b){return b>0?Math.round(a/b*100)+'%':'—';}
+function cnt(a,b){return a.toLocaleString()+' of '+b.toLocaleString();}
+function s(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function sbadge(id,cls,txt){const e=document.getElementById(id);if(e){e.className='kbg '+cls;e.textContent=txt;}}
+function badge(p){return p>=80?['bg','On target']:p>=60?['bo','Below target']:['br','Needs attention'];}
+function dc(id){if(CHS[id]){CHS[id].destroy();delete CHS[id];}}
+function fmtD(v){if(!v)return'—';return v.replace(/(\d{4})-(\d{2})-(\d{2})/,(_,y,m,d)=>{const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1];return d+' '+mn+' '+y;});}
+
+// KPIs
+function rKPI(bio,days,fb,tech){
+  const hkQ=days.reduce((s,d)=>s+d.hkQ,0),hkS=days.reduce((s,d)=>s+d.hkS,0);
+  const sgQ=days.reduce((s,d)=>s+d.sgQ,0),sgS=days.reduce((s,d)=>s+d.sgS,0);
+  const ksQ=days.reduce((s,d)=>s+d.ksQ,0),ksS=days.reduce((s,d)=>s+d.ksS,0);
+  const hkP=pc(hkS,hkQ),sgP=pc(sgS,sgQ),ksP=pc(ksS,ksQ),ovP=Math.round((hkP+sgP+ksP)/3);
+  const caps=days.reduce((s,d)=>s+d.caps,0);
+  const dr=days.length>0?days[0].label+' – '+days[days.length-1].label:'—';
+  s('k-bio-br',bio.totalUniqueBranches.toLocaleString());
+  s('k-caps',caps.toLocaleString());s('k-caps-n',dr);s('k-caps-d',days.length+' day'+(days.length!==1?'s':''));
+  s('k-hk',hkP+'%');s('k-hk-n',hkS.toLocaleString()+' of '+hkQ.toLocaleString()+' showed');sbadge('k-hk-b',...badge(hkP));
+  s('k-sg',sgP+'%');s('k-sg-n',sgS.toLocaleString()+' of '+sgQ.toLocaleString()+' showed');sbadge('k-sg-b',...badge(sgP));
+  s('k-ks',ksP+'%');s('k-ks-n',ksS.toLocaleString()+' of '+ksQ.toLocaleString()+' showed');sbadge('k-ks-b',...badge(ksP));
+  s('k-overall',ovP+'%');sbadge('k-overall-b',...badge(ovP));
+  const clP=pc(fb.submitted,fb.total),ovPct=pc(fb.overdue,fb.total);
+  s('k-fb-br',fb.branches);s('k-cl',clP+'%');s('k-cl-n',cnt(fb.submitted,fb.total)+' submitted');
+  sbadge('k-cl-b',clP>=80?'bg':clP>=50?'bo':'br',clP>=80?'Healthy':clP>=50?'Moderate':'Critical');
+  s('k-ov-pct',ovPct+'%');s('k-ov-n',cnt(fb.overdue,fb.total)+' forms');
+  s('k-avov',fb.avgOverdue.toFixed(1));s('k-total',fb.total.toLocaleString());
+  const sc=st=>tech.filter(t=>t.status.trim()===st).length;
+  const td=sc('Deployed'),tq=sc('QA Testing'),tv=sc('In Development'),tn=sc('Not Started'),tr=sc('Ready for Release');
+  s('k-t-dep',td);s('k-t-dep-n','of '+tech.length+' items');
+  s('k-t-qa',tq);s('k-t-dev',tv);s('k-t-ns',tn+tr);s('k-t-ns-n',tn+' backlog, '+tr+' ready');
+}
+
+// BIOMETRIC
+function rBio(bio,days){
+  const lbl=days.map(d=>d.label+' ('+d.day.slice(0,3)+')');
+  const hkP=days.map(d=>d.hkQ>0?+(d.hkS/d.hkQ*100).toFixed(1):0);
+  const sgP=days.map(d=>d.sgQ>0?+(d.sgS/d.sgQ*100).toFixed(1):0);
+  const ksP=days.map(d=>d.ksQ>0?+(d.ksS/d.ksQ*100).toFixed(1):0);
+  const dr=days.length>0?days[0].label+' – '+days[days.length-1].label:'—';
+  s('bio-dr',dr);
+  dc('bioChart');CHS.bioChart=new Chart(document.getElementById('bioChart'),{type:'line',data:{labels:lbl,datasets:[
+    {label:'HK (Housekeeping)',data:hkP,borderColor:'#1A7A4A',backgroundColor:'rgba(26,122,74,.08)',tension:.3,fill:true,pointRadius:4,borderWidth:2},
+    {label:'SG (Security)',data:sgP,borderColor:'#E67E22',backgroundColor:'rgba(230,126,34,.05)',tension:.3,fill:false,pointRadius:4,borderWidth:2},
+    {label:'Kitchen',data:ksP,borderColor:'#7A4E2D',backgroundColor:'rgba(122,78,45,.04)',tension:.3,fill:false,pointRadius:4,borderWidth:2,borderDash:[5,3]},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10},color:'#64748b'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},x:{ticks:{font:{size:10},color:'#64748b',maxRotation:30},grid:{display:false},border:{display:false}}}}});
+  rBar('hkChart',lbl,hkP,'#1A7A4A','HK %');rBar('sgChart',lbl,sgP,'#E67E22','SG %');rBar('ksChart',lbl,ksP,'#7A4E2D','Kitchen %');
+  const caps=days.reduce((s,d)=>s+d.caps,0);s('bioMeta',days.length+' days · '+caps.toLocaleString()+' captures');
+  const tb=document.getElementById('bioBody');tb.innerHTML='';
+  const pc2=(a,b)=>b>0?Math.round(a/b*100):0,pc3=p=>p>=80?'#15803d':p>=60?'#c2410c':'#b91c1c';
+  days.forEach(d=>{const h=pc2(d.hkS,d.hkQ),sg=pc2(d.sgS,d.sgQ),k=pc2(d.ksS,d.ksQ);
+    tb.innerHTML+=`<tr><td><strong>${d.label}</strong></td><td>${d.day}</td><td>${d.branches}</td><td>${d.hkQ}</td><td>${d.hkS}</td><td style="color:${pc3(h)};font-weight:600">${h}%</td><td>${d.sgQ}</td><td>${d.sgS}</td><td style="color:${pc3(sg)};font-weight:600">${sg}%</td><td>${d.ksQ}</td><td>${d.ksS}</td><td style="color:${pc3(k)};font-weight:600">${k}%</td><td>${d.caps.toLocaleString()}</td></tr>`;
+  });
+}
+function rBar(id,lbl,data,color,label){dc(id);CHS[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels:lbl,datasets:[{label,data,backgroundColor:color+'33',borderColor:color,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10},color:'#64748b'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},x:{ticks:{font:{size:10},color:'#64748b',maxRotation:30},grid:{display:false},border:{display:false}}}}});}
+
+// FEEDBACK
+function rFB(fb){
+  s('fb-br',fb.branches||'—');s('fb-ov',pct(fb.overdue,fb.total));s('fb-ov-c',fb.overdue.toLocaleString()+' forms');
+  s('fb-hks',pct(fb.hkSubmitted,fb.hkTotal));s('fb-hks-n',cnt(fb.hkSubmitted,fb.hkTotal));
+  s('fb-hkn',pct(fb.hkTotal-fb.hkSubmitted,fb.hkTotal));s('fb-hkn-n',cnt(fb.hkTotal-fb.hkSubmitted,fb.hkTotal));
+  s('fb-sgs',pct(fb.sgSubmitted,fb.sgTotal));s('fb-sgs-n',cnt(fb.sgSubmitted,fb.sgTotal));
+  s('fb-sgn',pct(fb.sgTotal-fb.sgSubmitted,fb.sgTotal));s('fb-sgn-n',cnt(fb.sgTotal-fb.sgSubmitted,fb.sgTotal));
+  s('fb-wks',pct(fb.weeklySubmitted,fb.weeklyTotal));s('fb-wks-n',cnt(fb.weeklySubmitted,fb.weeklyTotal));
+  s('fb-wkn',pct(fb.weeklyTotal-fb.weeklySubmitted,fb.weeklyTotal));s('fb-wkn-n',cnt(fb.weeklyTotal-fb.weeklySubmitted,fb.weeklyTotal));
+  s('fbMeta',fb.total.toLocaleString()+' forms · '+fb.branches+' branches');
+  dc('fbStatusChart');CHS.fbStatusChart=new Chart(document.getElementById('fbStatusChart'),{type:'doughnut',data:{labels:['Submitted','Overdue'],datasets:[{data:[fb.submitted,fb.overdue],backgroundColor:['#1A7A4A','#C0392B'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:12}},tooltip:{callbacks:{label:c=>c.label+': '+c.raw.toLocaleString()+' ('+Math.round(c.raw/fb.total*100)+'%)'}}}}});
+  const sts=Object.keys(fb.bySubType||{});
+  dc('fbTypeChart');if(sts.length){CHS.fbTypeChart=new Chart(document.getElementById('fbTypeChart'),{type:'bar',data:{labels:sts,datasets:[{label:'Submitted',data:sts.map(k=>fb.bySubType[k].submitted),backgroundColor:'#1A7A4A88',borderColor:'#1A7A4A',borderWidth:1.5,borderRadius:4},{label:'Not Submitted',data:sts.map(k=>fb.bySubType[k].total-fb.bySubType[k].submitted),backgroundColor:'#C0392B44',borderColor:'#C0392B',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}},scales:{x:{ticks:{font:{size:11}},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});}
+  const bars=document.getElementById('fbBars');bars.innerHTML='';
+  [{lbl:'Overall',s:fb.submitted,t:fb.total,c:'#1B3A6B'},{lbl:'Housekeeping (HK)',s:fb.hkSubmitted,t:fb.hkTotal,c:'#0D7377'},{lbl:'Security (SG)',s:fb.sgSubmitted,t:fb.sgTotal,c:'#E67E22'},{lbl:'Weekly Forms',s:fb.weeklySubmitted,t:fb.weeklyTotal,c:'#7B4FD1'}].forEach(r=>{
+    const p=r.t>0?Math.round(r.s/r.t*100):0;
+    bars.innerHTML+=`<div class="cbrow"><div class="cblbl">${r.lbl}</div><div class="cbbar"><div class="cbfill" style="width:${p}%;background:${r.c}"></div></div><div class="cbval" style="color:${r.c}">${p}%</div></div>`;
+  });
+  const lb=document.getElementById('fbList');lb.innerHTML='';
+  if(fb.formList){fb.formList.slice(0,200).forEach(f=>{const sc=f.status==='Submitted'?'s-sub':'s-ov';lb.innerHTML+=`<tr><td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.branch||'—'}</td><td>${f.designation||'—'}</td><td>${f.subType||'—'}</td><td><span class="sp ${sc}">${f.status}</span></td><td style="font-size:11px">${f.dueDate||'—'}</td><td style="color:${f.daysOverdue>0?'#b91c1c':'#15803d'}">${f.daysOverdue>0?f.daysOverdue+'d':'—'}</td></tr>`;});}
+  else lb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-size:12px">Upload feedback data to see records</td></tr>';
+}
+
+// TECH
+const SO=['Deployed','Ready for Release','QA Testing','In Development','Not Started'];
+const SC={Deployed:'#1A7A4A','Ready for Release':'#22a05a','QA Testing':'#0D7377','In Development':'#E67E22','Not Started':'#94a3b8'};
+const SS={Deployed:'s-dep','Ready for Release':'s-rdy','QA Testing':'s-qa','In Development':'s-dev','Not Started':'s-ns'};
+const SL={Deployed:'Deployed','Ready for Release':'Ready','QA Testing':'QA','In Development':'In Dev','Not Started':'Backlog'};
+function rTech(tech,dep){
+  const cnt={}; SO.forEach(s2=>cnt[s2]=tech.filter(t=>t.status.trim()===s2).length);
+  s('tech-total',tech.length+' items total');s('techMeta',tech.length+' requirements');
+  const stg=document.getElementById('techStages');stg.innerHTML='';
+  SO.forEach(s2=>{const c=cnt[s2]||0;stg.innerHTML+=`<div class="tsc"><div class="tsv" style="color:${SC[s2]}">${c}</div><div class="tsl">${SL[s2]}</div><div class="tsb" style="background:${SC[s2]}33"><div style="height:100%;background:${SC[s2]};border-radius:2px;width:${tech.length>0?c/tech.length*100:0}%"></div></div></div>`;});
+  const donutData={labels:SO,datasets:[{data:SO.map(s2=>cnt[s2]||0),backgroundColor:SO.map(s2=>SC[s2]),borderWidth:0,hoverOffset:4}]};
+  dc('techChart');CHS.techChart=new Chart(document.getElementById('techChart'),{type:'doughnut',data:donutData,options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}});
+  dc('techStatusChart');CHS.techStatusChart=new Chart(document.getElementById('techStatusChart'),{type:'doughnut',data:donutData,options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12,padding:12}}}}});
+  const mb=document.getElementById('issuesMini');mb.innerHTML='';
+  tech.filter(t=>['QA Testing','In Development'].includes(t.status.trim())).slice(0,9).forEach(t=>{mb.innerHTML+=`<tr><td style="color:var(--muted);font-size:11px">${t.num}</td><td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.name}</td><td><span class="sp ${SS[t.status.trim()]||'s-ns'}">${t.status.trim()}</span></td></tr>`;});
+  const db=document.getElementById('depBody');db.innerHTML='';
+  (dep||[]).filter(d=>d.feature).forEach(d=>{db.innerHTML+=`<tr><td>${d.num}</td><td style="font-size:11px">${d.feature}</td><td><span class="sp s-dep">${d.platform}</span></td><td style="font-size:11px">${d.date}</td><td style="font-size:11px;max-width:220px">${d.notes||'—'}</td></tr>`;});
+  const tb=document.getElementById('techBody');tb.innerHTML='';
+  tech.forEach((t,i)=>{const sc=SS[t.status.trim()]||'s-ns';tb.innerHTML+=`<tr><td style="color:var(--muted)">${t.num}</td><td style="font-size:11px;max-width:260px">${t.name}</td><td style="font-size:11px">${t.type||'—'}</td><td style="font-size:11px">${t.platform||'—'}</td><td style="font-size:11px">${t.dev||'—'}</td><td><span class="sp ${sc}">${t.status.trim()}</span></td><td style="font-size:11px">${fmtD(t.start)}</td><td style="font-size:11px">${fmtD(t.expected)}</td><td style="white-space:nowrap"><button class="bsm bedit" onclick="openEdit(${i})">Edit</button><button class="bsm bdel" onclick="confirmDel(${i})">Del</button></td></tr>`;});
+}
+
+// TECH CRUD
+function openAdd(){s('tmTitle','Add New Item');document.getElementById('tmIdx').value='';document.getElementById('tmDelBtn').style.display='none';['tm-name','tm-dev','tm-qa','tm-start','tm-exp','tm-jira'].forEach(id=>document.getElementById(id).value='');document.getElementById('tm-type').value='Feature';document.getElementById('tm-plat').value='Admin Panel';document.getElementById('tm-status').value='Not Started';document.getElementById('techModal').classList.add('open');}
+function openEdit(i){const tech=la().tech,t=tech[i];s('tmTitle','Edit Item #'+t.num);document.getElementById('tmIdx').value=i;document.getElementById('tmDelBtn').style.display='block';document.getElementById('tm-name').value=t.name||'';document.getElementById('tm-type').value=t.type||'Feature';document.getElementById('tm-plat').value=t.platform||'Admin Panel';document.getElementById('tm-dev').value=t.dev||'';document.getElementById('tm-qa').value=t.qa||'';document.getElementById('tm-status').value=t.status.trim();document.getElementById('tm-start').value=t.start||'';document.getElementById('tm-exp').value=t.expected||'';document.getElementById('tm-jira').value=t.jira||'';document.getElementById('techModal').classList.add('open');}
+async function saveTM(){
+  const tech=[...la().tech];
+  const i=document.getElementById('tmIdx').value;
+  const item={name:document.getElementById('tm-name').value.trim(),type:document.getElementById('tm-type').value,platform:document.getElementById('tm-plat').value,dev:document.getElementById('tm-dev').value.trim()||'—',qa:document.getElementById('tm-qa').value.trim()||'—',status:document.getElementById('tm-status').value,start:document.getElementById('tm-start').value,expected:document.getElementById('tm-exp').value,jira:document.getElementById('tm-jira').value.trim()};
+  if(!item.name){alert('Feature name is required.');return;}
+  if(i===''){item.num=tech.length>0?Math.max(...tech.map(t=>t.num))+1:1;tech.push(item);}
+  else{item.num=tech[+i].num;tech[+i]=item;}
+  const saveBtn=document.querySelector('#techModal .btn.bp');
+  if(saveBtn){saveBtn.textContent='Saving...';saveBtn.disabled=true;}
+  try{
+    await stech(tech);
+    closeTM();render();
+    showSaveSuccess('Tech tracker saved!');
+  }catch(e){
+    showSaveError('Save failed: '+e.message);
+  }finally{
+    if(saveBtn){saveBtn.textContent='Save';saveBtn.disabled=false;}
+  }
+}
+function confirmDel(i){document.getElementById('tmIdx').value=i;if(confirm('Delete this item? This cannot be undone.'))doDelete();}
+async function doDelete(){
+  const i=+document.getElementById('tmIdx').value;
+  const tech=[...la().tech];
+  tech.splice(i,1);tech.forEach((t,j)=>t.num=j+1);
+  try{
+    await stech(tech);closeTM();render();
+    showSaveSuccess('Item deleted.');
+  }catch(e){showSaveError('Delete failed: '+e.message);}
+}
+function closeTM(){document.getElementById('techModal').classList.remove('open');}
+
+// UPLOAD
+function openUpload(){document.getElementById('uploadModal').classList.add('open');}
+function closeUp(){document.getElementById('uploadModal').classList.remove('open');document.getElementById('umsg').style.display='none';['bioSub','fbSub'].forEach(id=>{const e=document.getElementById(id);e.textContent='Drag & drop or click · .xlsx / .xls';e.style.color='';});document.getElementById('bioFile').value='';document.getElementById('fbFile').value='';PD={bio:null,fb:null};}
+function hf(e,type){const f=e.target.files[0];if(f)pxl(f,type);}
+function ddf(e,type){e.preventDefault();dlv(type==='bio'?'bioZone':'fbZone');const f=e.dataTransfer.files[0];if(f)pxl(f,type);}
+function dov(e,id){e.preventDefault();document.getElementById(id).classList.add('dragover');}
+function dlv(id){document.getElementById(id).classList.remove('dragover');}
+function pxl(file,type){
+  const r=new FileReader();r.onload=function(e){
+    try{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      if(type==='bio'){const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{defval:''});PD.bio=parseBio(rows);const el=document.getElementById('bioSub');el.textContent='✓ '+rows.length+' rows — '+file.name;el.style.color='var(--green)';}
+      else{const ws=wb.Sheets['Feedback Form Data']||wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{defval:''});PD.fb=parseFB(rows);const el=document.getElementById('fbSub');el.textContent='✓ '+rows.length+' rows — '+file.name;el.style.color='var(--green)';}
+      showMsg('File loaded. Click Apply to refresh.','success');
+    }catch(err){showMsg('Error: '+err.message,'error');}
+  };r.readAsArrayBuffer(file);
+}
+function parseBio(rows){
+  const bd={},ab=new Set();
+  rows.forEach(r=>{
+    const raw=r['Date']||'';let iso='',label='',day=String(r['Day']||'');
+    if(raw instanceof Date){iso=raw.toISOString().split('T')[0];label=raw.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}
+    else if(typeof raw==='number'){const d=XLSX.SSF.parse_date_code(raw);iso=`${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;label=String(d.d).padStart(2,'0')+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.m-1];}
+    else{try{const d=new Date(raw);if(!isNaN(d)){iso=d.toISOString().split('T')[0];label=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}}catch(e){}}
+    if(!iso)return;
+    if(!bd[iso])bd[iso]={date:iso,label,day,branches:new Set(),hkQ:0,hkS:0,sgQ:0,sgS:0,ksQ:0,ksS:0,caps:0};
+    const d=bd[iso],br=r['Branch Code']||'';if(br){d.branches.add(br);ab.add(br);}
+    d.hkQ+=Number(r['Hk Staff Quota']||0);d.hkS+=Number(r['HK Staff Showed Up']||0);
+    d.sgQ+=Number(r['SG Staff Quota']||0);d.sgS+=Number(r['SG Staff Showed Up']||0);
+    d.ksQ+=Number(r['Total Kitchen Staff Quota']||0);d.ksS+=Number(r['Total Kitchen Staff Showed Up']||0);
+    d.caps+=Number(r['Total Captures']||0);
+  });
+  return{totalUniqueBranches:ab.size,daily:Object.values(bd).map(d=>({...d,branches:d.branches.size})).sort((a,b)=>a.date.localeCompare(b.date))};
+}
+function parseFB(rows){
+  // Build normalised raw rows for date-based filtering
+  const rawRows=rows.map(r=>{
+    const statusStr=String(r['Status']||'').toLowerCase();
+    const isSubmitted=statusStr.includes('submit');
+    const isOverdue=statusStr.includes('overdu')||statusStr.includes('missed');
+    // Parse Due Date as ISO for filtering
+    let dateISO='';
+    const rawDt=r['Due Date']||r['Date Submitted']||r['date']||'';
+    if(rawDt instanceof Date){dateISO=rawDt.toISOString().split('T')[0];}
+    else if(typeof rawDt==='number'&&rawDt>0){try{const d=XLSX.SSF.parse_date_code(rawDt);dateISO=d.y+'-'+String(d.m).padStart(2,'0')+'-'+String(d.d).padStart(2,'0');}catch(e){}}
+    else if(rawDt){try{const d=new Date(rawDt);if(!isNaN(d))dateISO=d.toISOString().split('T')[0];}catch(e){}}
+    return{
+      branch:String(r['Branch Code']||''),
+      designation:String(r['Designation']||''),
+      subType:String(r['Sub Type']||r['Form Type']||'Other').trim(),
+      status:String(r['Status']||''),
+      isSubmitted,isOverdue,
+      dueDate:dateISO||String(rawDt).split('T')[0],
+      dateISO,
+      daysOverdue:Number(r['Days Overdue']||0)
+    };
+  });
+  return aggFBRows(rawRows,{rawRows});
+}
+async function applyUp(){
+  const now=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const current=la();
+  // Build payload — only include bio/fb if freshly uploaded this session
+  // The server will merge with existing data, so we only send what changed
+  const newData={
+    lastUpdated:now,
+    tech:current.tech,
+    dep:current.dep
+  };
+  if(PD.bio) newData.bio=PD.bio;
+  if(PD.fb)  newData.fb=PD.fb;
+  // If nothing was uploaded this session, nothing to save
+  if(!PD.bio&&!PD.fb){closeUp();showSaveSuccess('No new files uploaded.');return;}
+  const saveBtn=document.querySelector('#uploadModal .btn.bp');
+  if(saveBtn){saveBtn.textContent='Saving...';saveBtn.disabled=true;}
+  try{
+    const result = await saveToGitHub(newData);
+    closeUp();
+    // Build a human-readable merge summary
+    const s = result.summary || {};
+    const parts = [];
+    if (s.bio) parts.push(`Biometric: +${s.bio.newDays} new day${s.bio.newDays!==1?'s':''}, ${s.bio.updatedDays} updated (${s.bio.totalDays} total)`);
+    if (s.fb && s.fb.newRows != null) parts.push(`Feedback: +${s.fb.newRows} new rows, ${s.fb.updatedRows} updated (${s.fb.totalRows} total)`);
+    const msg = parts.length > 0 ? parts.join(' · ') + '. Refreshing in 5s...' : 'Data saved! Refreshing in 5s...';
+    showSaveSuccess(msg);
+    setTimeout(()=>{GDATA=null;loadFromGitHub().then(render);},5000);
+  }catch(e){
+    showSaveError('Save failed: '+e.message+'. Check your Netlify function setup.');
+  }finally{
+    if(saveBtn){saveBtn.textContent='Apply & Refresh';saveBtn.disabled=false;}
+  }
+}
+function showMsg(msg,type){const e=document.getElementById('umsg');e.textContent=msg;e.className='umsg '+type;e.style.display='block';}
+
+// TABS
+function switchTab(n){document.querySelectorAll('.ntab').forEach((t,i)=>t.classList.toggle('active',['overview','biometric','feedback','tech'][i]===n));document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));const p=document.getElementById('tab-'+n);if(p)p.classList.add('active');}
+
+document.getElementById('techModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTM();});
+document.getElementById('uploadModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeUp();});
+window.addEventListener('DOMContentLoaded', async ()=>{
+  setLoadingState(true);
+  await loadFromGitHub();
+  setLoadingState(false);
+  render();
+});
+
+// ── UI HELPERS ────────────────────────────────────────────────
+function setLoadingState(loading){
+  const main=document.querySelector('.main');
+  if(!main) return;
+  if(loading){
+    if(!document.getElementById('loadingBanner')){
+      const b=document.createElement('div');
+      b.id='loadingBanner';
+      b.style.cssText='position:fixed;top:54px;left:0;right:0;background:var(--navy);color:#fff;text-align:center;font-size:12px;padding:6px;z-index:500;';
+      b.textContent='Loading data from GitHub...';
+      document.body.appendChild(b);
+    }
+  } else {
+    const b=document.getElementById('loadingBanner');
+    if(b) b.remove();
+  }
+}
+function showSaveSuccess(msg){
+  showToast(msg,'#1A7A4A');
+}
+function showSaveError(msg){
+  showToast(msg,'#C0392B');
+}
+function showToast(msg,bg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;color:#fff;z-index:999;transition:opacity .3s;box-shadow:0 4px 12px rgba(0,0,0,.2);';document.body.appendChild(t);}
+  t.textContent=msg;t.style.background=bg;t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.style.opacity='0';},4000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+{
+  "lastUpdated": "Seed data (Mar 2026)",
+  "bio": {
+    "totalUniqueBranches": 709,
+    "daily": [
+      {
+        "date": "2026-03-19",
+        "label": "19 Mar",
+        "day": "Thu",
+        "branches": 313,
+        "hkQ": 1820,
+        "hkS": 1146,
+        "sgQ": 2104,
+        "sgS": 979,
+        "ksQ": 712,
+        "ksS": 300,
+        "caps": 3934
+      },
+      {
+        "date": "2026-03-20",
+        "label": "20 Mar",
+        "day": "Fri",
+        "branches": 659,
+        "hkQ": 3941,
+        "hkS": 3297,
+        "sgQ": 4523,
+        "sgS": 2249,
+        "ksQ": 1521,
+        "ksS": 601,
+        "caps": 9440
+      },
+      {
+        "date": "2026-03-21",
+        "label": "21 Mar",
+        "day": "Sat",
+        "branches": 451,
+        "hkQ": 2677,
+        "hkS": 1885,
+        "sgQ": 3084,
+        "sgS": 1423,
+        "ksQ": 1037,
+        "ksS": 470,
+        "caps": 5585
+      },
+      {
+        "date": "2026-03-22",
+        "label": "22 Mar",
+        "day": "Sun",
+        "branches": 285,
+        "hkQ": 1670,
+        "hkS": 901,
+        "sgQ": 1929,
+        "sgS": 913,
+        "ksQ": 648,
+        "ksS": 254,
+        "caps": 3200
+      },
+      {
+        "date": "2026-03-23",
+        "label": "23 Mar",
+        "day": "Mon",
+        "branches": 670,
+        "hkQ": 4013,
+        "hkS": 3354,
+        "sgQ": 4598,
+        "sgS": 2022,
+        "ksQ": 1545,
+        "ksS": 600,
+        "caps": 6048
+      }
+    ]
+  },
+  "fb": {
+    "total": 3408,
+    "submitted": 1118,
+    "overdue": 2290,
+    "branches": 648,
+    "avgOverdue": 5.5,
+    "hkTotal": 1364,
+    "hkSubmitted": 360,
+    "sgTotal": 682,
+    "sgSubmitted": 205,
+    "weeklyTotal": 681,
+    "weeklySubmitted": 206,
+    "bySubType": {
+      "Housekeeping": {
+        "total": 1364,
+        "submitted": 360
+      },
+      "Security": {
+        "total": 682,
+        "submitted": 205
+      },
+      "Weekly": {
+        "total": 681,
+        "submitted": 206
+      },
+      "Other": {
+        "total": 681,
+        "submitted": 0
+      }
+    }
+  },
+  "tech": [
+    {
+      "num": 1,
+      "name": "Branch Auth Tab in Admin Panel",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "2026-03-05",
+      "expected": ""
+    },
+    {
+      "num": 2,
+      "name": "Branch Auth ID Management Screen",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "2026-03-05",
+      "expected": ""
+    },
+    {
+      "num": 3,
+      "name": "Remove Columns from Manpower Distribution",
+      "type": "Bug Fix",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 4,
+      "name": "Add Team Leader, AGM, Branch Status Columns",
+      "type": "Feature",
+      "platform": "All",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 5,
+      "name": "Add Filters for New Fields",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 6,
+      "name": "Validation for Inactive Branch Upload",
+      "type": "Validation",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 7,
+      "name": "Branch & Building Selection in Feedback Form",
+      "type": "Feature",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 8,
+      "name": "Access Control Before Branch Selection",
+      "type": "Feature",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 9,
+      "name": "Auto-Select Branch for Single Branch Users",
+      "type": "Feature",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 10,
+      "name": "Building Dropdown Structure",
+      "type": "Feature",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 11,
+      "name": "Display Building Details in Preview",
+      "type": "Feature",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 12,
+      "name": "Update Feedback Form Questions to Past Tense",
+      "type": "Content",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Not Started",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 13,
+      "name": "Add Feedback For Date Column",
+      "type": "Feature",
+      "platform": "All",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Not Started",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 14,
+      "name": "Add Building Details in Feedback Forms",
+      "type": "Feature",
+      "platform": "All",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Not Started",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 15,
+      "name": "Replace Designation-Based with Permission-Based Access",
+      "type": "Feature",
+      "platform": "All",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Ready for Release",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 16,
+      "name": "Display Role-wise Quota & Capture % on Dashboard",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "In Development",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 17,
+      "name": "Add Percentage Column in Export Report",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "In Development",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 18,
+      "name": "Download Consolidated Monthly Reports",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Not Started",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 19,
+      "name": "Improve Face Capture Guidance in Web App",
+      "type": "UX",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Deployed",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 20,
+      "name": "Rename Overdue to Submission Missed",
+      "type": "Content",
+      "platform": "All",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 21,
+      "name": "Add Submission Deadline Subheading",
+      "type": "UX",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 22,
+      "name": "Update Daily Form Availability Window",
+      "type": "Config",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 23,
+      "name": "Update Face Biometric Error Message",
+      "type": "Content",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "Not Started",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 24,
+      "name": "Add Edit Manpower Distribution Button",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 25,
+      "name": "Add Row-Level Edit in Manpower Distribution",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 26,
+      "name": "Enable Edit in Day-wise Quota Detail Screen",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "In Development",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 27,
+      "name": "Branch Auth ID \u2013 Bulk Upload Validations",
+      "type": "Validation",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 28,
+      "name": "Showcasing Enable Location Video Guide",
+      "type": "UX",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 29,
+      "name": "Feedback Form Default Option Removal",
+      "type": "UX",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 30,
+      "name": "Feedback Form Submit Button Validation",
+      "type": "Validation",
+      "platform": "Web App",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "QA Testing",
+      "start": "",
+      "expected": ""
+    },
+    {
+      "num": 31,
+      "name": "Admin Panel Dashboard Report Download Enhancement",
+      "type": "Feature",
+      "platform": "Admin Panel",
+      "dev": "\u2014",
+      "qa": "\u2014",
+      "status": "In Development",
+      "start": "",
+      "expected": ""
+    }
+  ],
+  "dep": [
+    {
+      "num": 1,
+      "feature": "Improve Face Capture UI Guidance",
+      "platform": "Web App",
+      "date": "16 Mar 2026",
+      "notes": "Area outside rectangle overlay greyed out. Added instruction Align your face inside the frame."
+    }
+  ]
+}
