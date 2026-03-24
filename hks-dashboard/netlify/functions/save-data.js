@@ -27,16 +27,28 @@ exports.handler = async (event) => {
 
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
   const GITHUB_REPO  = process.env.GITHUB_REPO;
-  const FILE_PATH = 'hks-dashboard/data/data.json';
+  const FILE_PATH    = 'hks-dashboard/data/data.json'; // full path from repo root
   const BRANCH       = 'main';
 
   if (!GITHUB_TOKEN || !GITHUB_REPO) {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Missing GITHUB_TOKEN or GITHUB_REPO env vars. Check Netlify site settings.' }),
+      body: JSON.stringify({
+        error: 'Missing GITHUB_TOKEN or GITHUB_REPO env vars. Check Netlify site settings.',
+        hint: 'Go to Netlify → Site configuration → Environment variables'
+      }),
     };
   }
+
+  // Debug: log what we're working with (token is masked for security)
+  const debugInfo = {
+    repo: GITHUB_REPO,
+    filePath: FILE_PATH,
+    branch: BRANCH,
+    tokenPresent: !!GITHUB_TOKEN,
+    tokenPrefix: GITHUB_TOKEN ? GITHUB_TOKEN.substring(0, 4) + '...' : 'MISSING'
+  };
 
   // Parse the incoming payload from the dashboard
   // Shape: { bio?: {...}, fb?: {...}, tech?: [...], dep?: [...], lastUpdated: string }
@@ -101,7 +113,11 @@ exports.handler = async (event) => {
     return {
       statusCode: putRes.status,
       headers,
-      body: JSON.stringify({ error: 'GitHub commit failed', detail: errText }),
+      body: JSON.stringify({
+        error: 'GitHub commit failed',
+        detail: errText,
+        debug: debugInfo
+      }),
     };
   }
 
