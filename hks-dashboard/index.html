@@ -402,7 +402,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 // ── GITHUB DATA SOURCE ──────────────────────────────────────────
 // Replace GITHUB_RAW_URL with your actual raw URL after setup.
 // Format: https://raw.githubusercontent.com/USERNAME/REPO/main/data/data.json
-const GITHUB_RAW_URL = 'REPLACE_WITH_YOUR_RAW_URL';
+const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/shravan57/HK-S-Dashboard/refs/heads/main/hks-dashboard/data/data.json';
 const SAVE_FUNCTION_URL = '/.netlify/functions/save-data';
 
 let CHS={}, PD={bio:null,fb:null}, AF={type:'all',from:null,to:null};
@@ -476,8 +476,7 @@ const SD=[{num:1,feature:'Improve Face Capture UI Guidance',platform:'Web App',d
 
 // Load data from GitHub (with cache-bust), fall back to seed if unavailable
 async function loadFromGitHub(){
-  if(GITHUB_RAW_URL==='REPLACE_WITH_YOUR_RAW_URL'){
-    // Not configured yet — use seed data
+  if(false){
     GDATA={bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
     return;
   }
@@ -496,8 +495,7 @@ function la(){
 }
 // Save full data object to GitHub via Netlify function
 async function saveToGitHub(newData){
-  if(GITHUB_RAW_URL==='REPLACE_WITH_YOUR_RAW_URL'){
-    // Not configured — just update in-memory
+  if(false){
     GDATA=newData; return {ok:true,local:true};
   }
   try{
