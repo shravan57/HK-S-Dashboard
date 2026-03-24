@@ -27,7 +27,7 @@ exports.handler = async (event) => {
 
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
   const GITHUB_REPO  = process.env.GITHUB_REPO;
-  const FILE_PATH    = 'data/data.json';
+  const FILE_PATH = 'hks-dashboard/data/data.json';
   const BRANCH       = 'main';
 
   if (!GITHUB_TOKEN || !GITHUB_REPO) {
