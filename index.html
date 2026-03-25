@@ -378,14 +378,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="modal">
     <div class="mtitle">Upload Data</div>
     <div class="msub">Upload latest Excel exports. Data is saved in your browser.</div>
-    <div id="tokenSection" style="margin-bottom:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
-      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">GITHUB TOKEN <span id="tokenStatus" style="margin-left:6px"></span></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="tokenInput" type="password" placeholder="Paste your GitHub token (ghp_...)" style="flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;outline:none">
-        <button onclick="saveToken()" style="padding:7px 14px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;white-space:nowrap">Save Token</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:5px">Stored in your browser only — never sent anywhere except GitHub API.</div>
-    </div>
     <div class="uzone" id="bioZone" onclick="document.getElementById('bioFile').click()" ondragover="dov(event,'bioZone')" ondragleave="dlv('bioZone')" ondrop="ddf(event,'bio')">
       <input type="file" id="bioFile" accept=".xlsx,.xls" onchange="hf(event,'bio')">
       <div style="font-size:24px;margin-bottom:6px">📡</div>
@@ -414,7 +406,7 @@ const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/shravan57/HK-S-Dashboa
 const GITHUB_REPO = 'shravan57/HK-S-Dashboard';
 // Your GitHub Personal Access Token — same one you used before
 // This is used client-side only to trigger the GitHub Action
-let GITHUB_TOKEN = localStorage.getItem('hks_github_token') || '';
+const GITHUB_TOKEN = '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';
 
 let CHS={}, PD={bio:null,fb:null}, AF={type:'all',from:null,to:null};
 let GDATA = null; // holds the full data object loaded from GitHub
@@ -504,55 +496,52 @@ async function loadFromGitHub(){
 function la(){
   return GDATA||{bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
 }
-// Save / update GitHub token from modal input
-function saveToken(){
-  const val = document.getElementById('tokenInput').value.trim();
-  if(!val.startsWith('ghp_') && !val.startsWith('github_pat_')){
-    alert('That does not look like a valid GitHub token. It should start with ghp_');
-    return;
-  }
-  GITHUB_TOKEN = val;
-  localStorage.setItem('hks_github_token', val);
-  document.getElementById('tokenInput').value = '';
-  refreshTokenStatus();
-  alert('Token saved! You can now upload data.');
-}
-function refreshTokenStatus(){
-  const el = document.getElementById('tokenStatus');
-  if(!el) return;
-  if(GITHUB_TOKEN){
-    el.innerHTML = '<span style="color:#22c55e">✓ Saved</span>';
-    document.getElementById('tokenInput').placeholder = 'Token saved — paste new one to replace';
-  } else {
-    el.innerHTML = '<span style="color:#ef4444">✗ Not set</span>';
-    document.getElementById('tokenInput').placeholder = 'Paste your GitHub token (ghp_...)';
-  }
-}
-// Save data by triggering a GitHub Actions workflow_dispatch
+// Save data directly to GitHub via Contents API (no size limit issue)
 async function saveToGitHub(newData){
   if(!GITHUB_TOKEN){
     throw new Error('GitHub token not set. Click Upload Data and paste your token in the token field.');
   }
-  // Dispatch the workflow — GitHub Action does the merge and commit
-  const res=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/save-data.yml/dispatches`,{
-    method:'POST',
-    headers:{
-      'Authorization':'token '+GITHUB_TOKEN,
-      'Accept':'application/vnd.github.v3+json',
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify({
-      ref:'main',
-      inputs:{ payload: JSON.stringify(newData) }
-    })
+  const FILE_PATH = 'hks-dashboard/data/data.json';
+  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${FILE_PATH}`;
+  const ghHeaders = {
+    'Authorization': 'token ' + GITHUB_TOKEN,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+
+  // Step 1: Get current file SHA (needed for update)
+  let sha = null;
+  try {
+    const getRes = await fetch(apiUrl + '?ref=main', { headers: ghHeaders });
+    if(getRes.ok){
+      const info = await getRes.json();
+      sha = info.sha;
+    }
+    // 404 = file doesn't exist yet, will create fresh
+  } catch(e) {}
+
+  // Step 2: Commit new content directly
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(newData, null, 2))));
+  const putBody = {
+    message: 'Dashboard update — ' + new Date().toISOString(),
+    content: content,
+    branch: 'main',
+    ...(sha ? { sha } : {})
+  };
+
+  const putRes = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: ghHeaders,
+    body: JSON.stringify(putBody)
   });
-  if(!res.ok){
-    const t=await res.text();
-    throw new Error('GitHub API error '+res.status+': '+t);
+
+  if(!putRes.ok){
+    const t = await putRes.text();
+    throw new Error('GitHub API error ' + putRes.status + ': ' + t);
   }
-  // 204 No Content = success for workflow dispatch
-  GDATA=newData;
-  return {ok:true, summary: newData._summary||{}};
+
+  GDATA = newData;
+  return { ok: true, summary: newData._summary || {} };
 }
 function stech(a){
   const d=la();
@@ -773,7 +762,7 @@ async function doDelete(){
 function closeTM(){document.getElementById('techModal').classList.remove('open');}
 
 // UPLOAD
-function openUpload(){document.getElementById('uploadModal').classList.add('open');refreshTokenStatus();}
+function openUpload(){document.getElementById('uploadModal').classList.add('open');}
 function closeUp(){document.getElementById('uploadModal').classList.remove('open');document.getElementById('umsg').style.display='none';['bioSub','fbSub'].forEach(id=>{const e=document.getElementById(id);e.textContent='Drag & drop or click · .xlsx / .xls';e.style.color='';});document.getElementById('bioFile').value='';document.getElementById('fbFile').value='';PD={bio:null,fb:null};}
 function hf(e,type){const f=e.target.files[0];if(f)pxl(f,type);}
 function ddf(e,type){e.preventDefault();dlv(type==='bio'?'bioZone':'fbZone');const f=e.dataTransfer.files[0];if(f)pxl(f,type);}
