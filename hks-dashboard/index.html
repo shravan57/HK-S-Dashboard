@@ -400,10 +400,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 <script>
 // ── GITHUB DATA SOURCE ──────────────────────────────────────────
-// Replace GITHUB_RAW_URL with your actual raw URL after setup.
-// Format: https://raw.githubusercontent.com/USERNAME/REPO/main/data/data.json
+// Your GitHub raw data URL — do not change this
 const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/shravan57/HK-S-Dashboard/refs/heads/main/hks-dashboard/data/data.json';
-const SAVE_FUNCTION_URL = '/.netlify/functions/save-data';
+// Your GitHub repo for dispatching the save Action
+const GITHUB_REPO = 'shravan57/HK-S-Dashboard';
+// Your GitHub Personal Access Token — same one you used before
+// This is used client-side only to trigger the GitHub Action
+const GITHUB_TOKEN = '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';
 
 let CHS={}, PD={bio:null,fb:null}, AF={type:'all',from:null,to:null};
 let GDATA = null; // holds the full data object loaded from GitHub
@@ -493,24 +496,31 @@ async function loadFromGitHub(){
 function la(){
   return GDATA||{bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
 }
-// Save full data object to GitHub via Netlify function
+// Save data by triggering a GitHub Actions workflow_dispatch
 async function saveToGitHub(newData){
-  if(false){
-    GDATA=newData; return {ok:true,local:true};
+  if(!GITHUB_TOKEN||GITHUB_TOKEN==='PASTE_YOUR_GITHUB_TOKEN_HERE'){
+    throw new Error('GitHub token not set. Open index.html and paste your token into the GITHUB_TOKEN variable at the top of the script.');
   }
-  try{
-    const res=await fetch(SAVE_FUNCTION_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(newData)
-    });
-    if(!res.ok){const t=await res.text();throw new Error(t);}
-    GDATA=newData;
-    return await res.json();
-  }catch(e){
-    console.error('Save failed:',e);
-    throw e;
+  // Dispatch the workflow — GitHub Action does the merge and commit
+  const res=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/save-data.yml/dispatches`,{
+    method:'POST',
+    headers:{
+      'Authorization':'token '+GITHUB_TOKEN,
+      'Accept':'application/vnd.github.v3+json',
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+      ref:'main',
+      inputs:{ payload: JSON.stringify(newData) }
+    })
+  });
+  if(!res.ok){
+    const t=await res.text();
+    throw new Error('GitHub API error '+res.status+': '+t);
   }
+  // 204 No Content = success for workflow dispatch
+  GDATA=newData;
+  return {ok:true, summary: newData._summary||{}};
 }
 function stech(a){
   const d=la();
@@ -812,11 +822,11 @@ async function applyUp(){
     const parts = [];
     if (s.bio) parts.push(`Biometric: +${s.bio.newDays} new day${s.bio.newDays!==1?'s':''}, ${s.bio.updatedDays} updated (${s.bio.totalDays} total)`);
     if (s.fb && s.fb.newRows != null) parts.push(`Feedback: +${s.fb.newRows} new rows, ${s.fb.updatedRows} updated (${s.fb.totalRows} total)`);
-    const msg = parts.length > 0 ? parts.join(' · ') + '. Refreshing in 5s...' : 'Data saved! Refreshing in 5s...';
+    const msg = 'Sent to GitHub! Dashboard refreshes in 60 seconds while the Action runs...';
     showSaveSuccess(msg);
-    setTimeout(()=>{GDATA=null;loadFromGitHub().then(render);},5000);
+    setTimeout(()=>{GDATA=null;loadFromGitHub().then(render);},65000);
   }catch(e){
-    showSaveError('Save failed: '+e.message+'. Check your Netlify function setup.');
+    showSaveError('Save failed: '+e.message);
   }finally{
     if(saveBtn){saveBtn.textContent='Apply & Refresh';saveBtn.disabled=false;}
   }
