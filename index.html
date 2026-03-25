@@ -378,6 +378,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="modal">
     <div class="mtitle">Upload Data</div>
     <div class="msub">Upload latest Excel exports. Data is saved in your browser.</div>
+    <div id="tokenSection" style="margin-bottom:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">GITHUB TOKEN <span id="tokenStatus" style="margin-left:6px"></span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="tokenInput" type="password" placeholder="Paste your GitHub token (ghp_...)" style="flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;outline:none">
+        <button onclick="saveToken()" style="padding:7px 14px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;white-space:nowrap">Save Token</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px">Stored in your browser only — never sent anywhere except GitHub API.</div>
+    </div>
     <div class="uzone" id="bioZone" onclick="document.getElementById('bioFile').click()" ondragover="dov(event,'bioZone')" ondragleave="dlv('bioZone')" ondrop="ddf(event,'bio')">
       <input type="file" id="bioFile" accept=".xlsx,.xls" onchange="hf(event,'bio')">
       <div style="font-size:24px;margin-bottom:6px">📡</div>
@@ -406,7 +414,7 @@ const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/shravan57/HK-S-Dashboa
 const GITHUB_REPO = 'shravan57/HK-S-Dashboard';
 // Your GitHub Personal Access Token — same one you used before
 // This is used client-side only to trigger the GitHub Action
-const GITHUB_TOKEN = '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';
+let GITHUB_TOKEN = localStorage.getItem('hks_github_token') || '';
 
 let CHS={}, PD={bio:null,fb:null}, AF={type:'all',from:null,to:null};
 let GDATA = null; // holds the full data object loaded from GitHub
@@ -496,10 +504,34 @@ async function loadFromGitHub(){
 function la(){
   return GDATA||{bio:SB,fb:SF,tech:ST,dep:SD,lu:'Seed data (Mar 2026)'};
 }
+// Save / update GitHub token from modal input
+function saveToken(){
+  const val = document.getElementById('tokenInput').value.trim();
+  if(!val.startsWith('ghp_') && !val.startsWith('github_pat_')){
+    alert('That does not look like a valid GitHub token. It should start with ghp_');
+    return;
+  }
+  GITHUB_TOKEN = val;
+  localStorage.setItem('hks_github_token', val);
+  document.getElementById('tokenInput').value = '';
+  refreshTokenStatus();
+  alert('Token saved! You can now upload data.');
+}
+function refreshTokenStatus(){
+  const el = document.getElementById('tokenStatus');
+  if(!el) return;
+  if(GITHUB_TOKEN){
+    el.innerHTML = '<span style="color:#22c55e">✓ Saved</span>';
+    document.getElementById('tokenInput').placeholder = 'Token saved — paste new one to replace';
+  } else {
+    el.innerHTML = '<span style="color:#ef4444">✗ Not set</span>';
+    document.getElementById('tokenInput').placeholder = 'Paste your GitHub token (ghp_...)';
+  }
+}
 // Save data by triggering a GitHub Actions workflow_dispatch
 async function saveToGitHub(newData){
-  if(!GITHUB_TOKEN||GITHUB_TOKEN==='PASTE_YOUR_GITHUB_TOKEN_HERE'){
-    throw new Error('GitHub token not set. Open index.html and paste your token into the GITHUB_TOKEN variable at the top of the script.');
+  if(!GITHUB_TOKEN){
+    throw new Error('GitHub token not set. Click Upload Data and paste your token in the token field.');
   }
   // Dispatch the workflow — GitHub Action does the merge and commit
   const res=await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/save-data.yml/dispatches`,{
@@ -741,7 +773,7 @@ async function doDelete(){
 function closeTM(){document.getElementById('techModal').classList.remove('open');}
 
 // UPLOAD
-function openUpload(){document.getElementById('uploadModal').classList.add('open');}
+function openUpload(){document.getElementById('uploadModal').classList.add('open');refreshTokenStatus();}
 function closeUp(){document.getElementById('uploadModal').classList.remove('open');document.getElementById('umsg').style.display='none';['bioSub','fbSub'].forEach(id=>{const e=document.getElementById(id);e.textContent='Drag & drop or click · .xlsx / .xls';e.style.color='';});document.getElementById('bioFile').value='';document.getElementById('fbFile').value='';PD={bio:null,fb:null};}
 function hf(e,type){const f=e.target.files[0];if(f)pxl(f,type);}
 function ddf(e,type){e.preventDefault();dlv(type==='bio'?'bioZone':'fbZone');const f=e.dataTransfer.files[0];if(f)pxl(f,type);}
