@@ -1,0 +1,92 @@
+name: Save Dashboard Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: 'JSON data payload from dashboard'
+        required: true
+        type: string
+
+jobs:
+  save-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Merge and save data
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const DATA_FILE = 'hks-dashboard/data/data.json';
+          const incoming = JSON.parse(process.env.PAYLOAD);
+          let existing = null;
+          if (fs.existsSync(DATA_FILE)) {
+            try { existing = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e) {}
+          }
+          let mergedBio = existing ? { ...existing.bio } : { totalUniqueBranches: 0, daily: [] };
+          if (incoming.bio && incoming.bio.daily) {
+            const byDate = {};
+            (mergedBio.daily || []).forEach(d => byDate[d.date] = d);
+            incoming.bio.daily.forEach(d => { byDate[d.date] = d; });
+            mergedBio.daily = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+            mergedBio.totalUniqueBranches = incoming.bio.totalUniqueBranches || mergedBio.totalUniqueBranches;
+          }
+          let mergedFb = existing ? { ...existing.fb } : null;
+          if (incoming.fb) {
+            if (!mergedFb) {
+              mergedFb = incoming.fb;
+            } else {
+              const incomingRows = incoming.fb.rawRows || [];
+              if (incomingRows.length > 0) {
+                const byKey = {};
+                (mergedFb.rawRows || []).forEach(r => { byKey[r.dateISO+'|'+r.branch+'|'+r.subType+'|'+r.designation] = r; });
+                incomingRows.forEach(r => { byKey[r.dateISO+'|'+r.branch+'|'+r.subType+'|'+r.designation] = r; });
+                const allRows = Object.values(byKey);
+                const total = allRows.length;
+                const submitted = allRows.filter(r => r.isSubmitted).length;
+                const overdue = allRows.filter(r => r.isOverdue).length;
+                const branches = new Set(allRows.map(r => r.branch).filter(Boolean)).size;
+                const od = allRows.filter(r => r.daysOverdue > 0).map(r => r.daysOverdue);
+                const avgOverdue = od.length > 0 ? parseFloat((od.reduce((a,b)=>a+b,0)/od.length).toFixed(1)) : 0;
+                const bySubType = {};
+                allRows.forEach(r => {
+                  const st = r.subType || 'Other';
+                  if (!bySubType[st]) bySubType[st] = { total: 0, submitted: 0 };
+                  bySubType[st].total++;
+                  if (r.isSubmitted) bySubType[st].submitted++;
+                });
+                const find = kws => { for (const k of Object.keys(bySubType)) { if (kws.some(w => k.toLowerCase().includes(w))) return bySubType[k]; } return { total: 0, submitted: 0 }; };
+                const hk = find(['housekeeping','hk']), sg = find(['security','sg']), wk = find(['weekly','week']);
+                mergedFb = { total, submitted, overdue, branches, avgOverdue, hkTotal: hk.total, hkSubmitted: hk.submitted, sgTotal: sg.total, sgSubmitted: sg.submitted, weeklyTotal: wk.total, weeklySubmitted: wk.submitted, bySubType, rawRows: allRows };
+              } else {
+                mergedFb = { ...mergedFb, ...incoming.fb };
+              }
+            }
+          }
+          const result = {
+            lastUpdated: incoming.lastUpdated || new Date().toISOString(),
+            bio: mergedBio,
+            fb: mergedFb,
+            tech: incoming.tech || (existing ? existing.tech : []),
+            dep: incoming.dep || (existing ? existing.dep : [])
+          };
+          fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
+          fs.writeFileSync(DATA_FILE, JSON.stringify(result, null, 2));
+          console.log('Saved successfully');
+          "
+        env:
+          PAYLOAD: ${{ inputs.payload }}
+
+      - name: Commit updated data
+        run: |
+          git config user.name "HKS Dashboard Bot"
+          git config user.email "dashboard@noreply.github.com"
+          git add hks-dashboard/data/data.json
+          git diff --staged --quiet || git commit -m "Dashboard data update — $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
