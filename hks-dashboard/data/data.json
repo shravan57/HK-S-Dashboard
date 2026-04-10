@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "09 Apr 2026, 17:13",
+  "lastUpdated": "10 Apr 2026, 15:36",
   "tech": [
     {
       "num": 1,
@@ -105961,7 +105961,7 @@
         "date": "2026-04-07",
         "label": "07 Apr",
         "day": "Tuesday",
-        "branches": 836,
+        "branches": 0,
         "hkQ": 7030,
         "hkS": 4918,
         "sgQ": 2572,
@@ -124606,18 +124606,6 @@
             "caps": 3
           },
           {
-            "br": "RJ-NSPIRA-RO-7135",
-            "tl": "SAMPAT SAINI",
-            "state": "NA",
-            "hkQ": 2,
-            "hkS": 0,
-            "sgQ": 4,
-            "sgS": 0,
-            "ksQ": 0,
-            "ksS": 0,
-            "caps": 0
-          },
-          {
             "br": "TG-HYD-KDP(H)-NSPIRA-C-6552",
             "tl": "BUDUPALLI RAMESH",
             "state": "NA",
@@ -126052,6 +126040,18 @@
             "hkQ": 18,
             "hkS": 0,
             "sgQ": 6,
+            "sgS": 0,
+            "ksQ": 0,
+            "ksS": 0,
+            "caps": 0
+          },
+          {
+            "br": "RJ-NSPIRA-RO-7135",
+            "tl": "SAMPAT SAINI",
+            "state": "NA",
+            "hkQ": 2,
+            "hkS": 0,
+            "sgQ": 4,
             "sgS": 0,
             "ksQ": 0,
             "ksS": 0,
